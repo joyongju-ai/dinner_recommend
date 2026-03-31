@@ -136,4 +136,5 @@ def generate_recommendation(state: MenuState) -> dict:
         "recommendation": recommendation,
         "feedback": "", # 피드백은 app.py에서 버튼을 누를 때 갱신되므로 여기선 빈 문자열로 둡니다.
         "iteration_count": state["iteration_count"] + 1,
+        "history": new_history,
     }
