@@ -1,4 +1,4 @@
-#랭그래프를 이용한 저녁 메뉴 추천
+# 랭그래프를 이용한 저녁 메뉴 추천
 
 주소: https://dinnerrecommend-6zpfjo3fxvzjuvkv8pfmg5.streamlit.app/
 
@@ -18,19 +18,19 @@ langgraph-pjt2/
 ├── requirements.txt
 ├── .env                        # OPENAI_API_KEY 설정
 ├── data/
-│   └── menu_data.json          # 45개 메뉴 데이터 (7개 카테고리)
+│   └── menu_data.json          # 85개 메뉴 데이터 (7개 카테고리)
 ├── nodes/
 │   ├── collect_input.py        # 사용자 입력 수집 (state 전달 방식)
 │   ├── analyze.py              # GPT-4o-mini로 선호도 분석
 │   ├── search_restricted.py    # 식이 제한 메뉴 필터링 (JSON 기반)
 │   ├── search_general.py       # 일반 메뉴 필터링 (JSON 기반)
-│   └── recommend.py            # LLM 추천 생성 (랜덤 셔플 + 히스토리)
+│   └── recommend.py            # LLM 추천 생성 (전체 메뉴 폴백 + 중복 제거)
 ├── edges/
 │   ├── check_restriction.py    # 식이 제한 유무 분기
 │   └── check_feedback.py       # 만족/불만족 분기 (최대 3회)
 └── prompts/
-    ├── analyze_prompt.txt       # 선호도 분석 프롬프트
-    └── recommend_prompt.txt     # 메뉴 추천 프롬프트
+    ├── analyze_prompt.txt       # 선호도 분석 프롬프트 (상황별 mood 매핑)
+    └── recommend_prompt.txt     # 메뉴 추천 프롬프트 (원본 요청 기반 보정)
 ```
 
 ## 그래프 흐름
@@ -58,9 +58,26 @@ langgraph-pjt2/
 | 웹 UI | Streamlit (session_state로 화면 전환 관리) |
 | 상태 관리 | LangGraph checkpointer로 대화 상태 유지 |
 
+## 주요 기능
+
+### 상황 인식 추천
+- 사용자의 자연어 입력을 분석하여 기분/상황을 파악
+- "술안주", "해장", "데이트", "비오는 날" 등 상황별 키워드를 mood로 매핑
+- 분석 결과가 부정확할 경우, LLM이 사용자 원본 요청을 직접 참고하여 보정
+
+### 전체 메뉴 폴백
+- 점수 기반 필터링 후보가 사용자 요청과 맞지 않을 경우, 전체 메뉴 리스트에서 LLM이 직접 선택
+- 필터링 노드의 한계를 LLM 판단으로 보완하는 구조
+
+### 중복 추천 방지
+- history에 이전 추천 메뉴명을 누적 기록
+- 후보 리스트와 전체 메뉴 리스트 모두에서 이미 추천한 메뉴를 제외
+- LLM 응답에서 실제 추천된 메뉴명을 추출하여 정확한 히스토리 관리
+- 최대 3회 재추천 시 총 9개의 서로 다른 메뉴 추천 보장
+
 ## 메뉴 데이터
 
-`data/menu_data.json`에 45개 메뉴가 7개 카테고리로 구성되어 있습니다.
+`data/menu_data.json`에 85개 메뉴가 7개 카테고리로 구성되어 있습니다.
 
 - **카테고리**: 찌개, 밥류, 면류, 국물, 고기, 반찬/간식, 건강식
 - **필드**: name, category, description, taste, mood_tags, dietary_tags, allergens, cooking_difficulty
@@ -91,4 +108,4 @@ streamlit run app.py
 2. **추천 화면**: 3개 메뉴 추천 결과 → "만족해요!" / "다시 추천해줘" 버튼
 3. **종료 화면**: 최종 추천 결과 표시 → "처음부터 다시" 버튼
 
-재추천은 최대 3회까지 가능하며, 매번 후보를 랜덤 셔플하여 다른 조합을 제안합니다.
+재추천은 최대 3회까지 가능하며, 매회 이전에 추천한 메뉴를 제외하고 새로운 조합을 제안합니다.
