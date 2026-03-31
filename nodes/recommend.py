@@ -55,8 +55,9 @@ def generate_recommendation(state: MenuState) -> dict:
     })
 
     recommendation = result.content
-    current_names = [c['name'] for c in top]
-    new_history = old_history + current_names
+    all_menu_names = [m["name"] for m in _load_all_menus()]
+    recommended = [n for n in all_menu_names if n in recommendation]
+    new_history = old_history + recommended
 
     return {
         "recommendation": recommendation,
