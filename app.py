@@ -82,6 +82,12 @@
 
 
 import streamlit as st
+import os
+
+# 💡 [핵심] 다른 파일을 import 하기 전에 '가장 먼저' API 키를 환경 변수에 등록해야 합니다!
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+
 from dotenv import load_dotenv
 load_dotenv()
 
