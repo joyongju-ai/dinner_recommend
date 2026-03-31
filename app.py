@@ -123,6 +123,7 @@ if st.session_state.stage == "input":
             "recommendation": "",
             "feedback": "",
             "iteration_count": 0,
+            "history": [],
         }
 
         with st.spinner("메뉴를 분석하고 있어요..."):
