@@ -35,6 +35,7 @@ def generate_recommendation(state: MenuState) -> dict:
     candidates_str = "\n".join(_format_menu(c) for c in top)
 
     all_menus = _load_all_menus()
+    all_menus = [m for m in all_menus if m["name"] not in old_history]
     all_menus_str = "\n".join(_format_menu(m) for m in all_menus)
 
     restrictions = ", ".join(state["dietary_restrictions"]) if state["dietary_restrictions"] else "없음"
