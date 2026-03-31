@@ -42,6 +42,7 @@ def generate_recommendation(state: MenuState) -> dict:
 
     chain = prompt | llm
     result = chain.invoke({
+        "user_input": state["user_input"],
         "mood": state["mood"],
         "preferred_taste": ", ".join(state["preferred_taste"]),
         "cooking_difficulty": state["cooking_difficulty"],
