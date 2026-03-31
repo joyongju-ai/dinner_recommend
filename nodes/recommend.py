@@ -27,7 +27,8 @@ def _format_menu(m: dict) -> str:
 
 
 def generate_recommendation(state: MenuState) -> dict:
-    candidates = list(state["menu_candidates"])
+    old_history = state.get("history", [])
+    candidates = [c for c in state["menu_candidates"] if c["name"] not in old_history]
     random.shuffle(candidates)
     top = candidates[:5]
 
@@ -37,7 +38,6 @@ def generate_recommendation(state: MenuState) -> dict:
     all_menus_str = "\n".join(_format_menu(m) for m in all_menus)
 
     restrictions = ", ".join(state["dietary_restrictions"]) if state["dietary_restrictions"] else "없음"
-    old_history = state.get("history", [])
     history_str = ", ".join(old_history) if old_history else "없음"
 
     chain = prompt | llm
